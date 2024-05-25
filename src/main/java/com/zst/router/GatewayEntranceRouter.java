@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-public class RouterConfiguration {
+public class GatewayEntranceRouter {
     @Autowired
     private ServiceDiscoveryDispatcher serviceDiscoveryDispatcher;
 
