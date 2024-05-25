@@ -5,3 +5,4 @@ TODO
 * 写一个RouterFunction，拦截请求，中转到对应的服务
 * 集成配置中心
 * 集成注册中心
+* 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利
