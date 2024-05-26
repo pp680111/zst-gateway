@@ -1,22 +1,15 @@
-package com.zst.discovery.zstregistry;
+package com.zst.discovery.registry;
 
-import com.zst.discovery.zstregistry.model.InstanceMetadata;
-import com.zst.discovery.zstregistry.model.Server;
+import com.zst.discovery.registry.model.InstanceMetadata;
+import com.zst.discovery.registry.model.Server;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-@Component
 @Slf4j
 public class RegistryCenterService {
     private static final int SERVICE_RENEW_INTERVAL_MS = 5 * 1000;
@@ -40,14 +33,14 @@ public class RegistryCenterService {
     }
 
     public void stop() {
-        try {
-            scheduledExecutorService.shutdown();
-            if (scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                throw new RuntimeException("shutdown scheduler failed");
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+//        try {
+//            scheduledExecutorService.shutdown();
+//            if (scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS)) {
+//                throw new RuntimeException("shutdown scheduler failed");
+//            }
+//        } catch (Exception e) {
+//            log.error(e.getMessage(), e);
+//        }
     }
 
 //    @Override
@@ -63,10 +56,11 @@ public class RegistryCenterService {
 
         try {
             CompletableFuture<List<InstanceMetadata>> instances = client.getInstances(targetServer.getAddress(), serviceId);
-            instances.exceptionally(ex -> {
+            instances = instances.exceptionally(ex -> {
                 log.error(ex.getMessage(), ex);
                 return Collections.emptyList();
             });
+
             return Mono.fromFuture(instances);
         } catch (Exception e) {
             throw new RuntimeException(e);

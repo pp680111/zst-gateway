@@ -1,4 +1,4 @@
-package com.zst.discovery.zstregistry.exception;
+package com.zst.discovery.registry.exception;
 
 /**
  * 表示客户端调用错误的异常类

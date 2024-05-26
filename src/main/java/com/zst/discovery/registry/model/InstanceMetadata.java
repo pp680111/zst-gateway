@@ -1,4 +1,4 @@
-package com.zst.discovery.zstregistry.model;
+package com.zst.discovery.registry.model;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.zst.discovery.zstregistry.model;
+package com.zst.discovery.registry.model;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.Getter;

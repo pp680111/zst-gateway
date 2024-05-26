@@ -1,10 +1,10 @@
 package com.zst.configuration;
 
-import com.zst.router.GatewayEntranceRouter;
+import com.zst.discovery.registry.configuration.ZstRegistryConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Import(GatewayEntranceRouter.class)
+@Import(ZstRegistryConfig.class)
 @Configuration
-public class WebConfiguration {
+public class ContextConfig {
 }

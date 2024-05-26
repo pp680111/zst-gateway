@@ -1,16 +1,18 @@
-package com.zst.discovery.zstregistry;
+package com.zst.discovery.registry;
 
 import com.alibaba.fastjson2.JSONArray;
-import com.zst.discovery.zstregistry.exception.ClientInvokeException;
-import com.zst.discovery.zstregistry.model.InstanceMetadata;
-import com.zst.discovery.zstregistry.model.Server;
+import com.zst.discovery.registry.exception.ClientInvokeException;
+import com.zst.discovery.registry.model.InstanceMetadata;
+import com.zst.discovery.registry.model.Server;
 import com.zst.utils.HttpInvoker;
 import com.zst.utils.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-@Component
 public class RegistryCenterClient {
+    private static final Logger log = LoggerFactory.getLogger(RegistryCenterClient.class);
     private int timeout = 5_000;
 
     private HttpInvoker httpInvoker;
@@ -48,6 +50,11 @@ public class RegistryCenterClient {
             CompletableFuture<HttpResponse> responseFuture = httpInvoker.doGet(url, null, urlParams);
             return responseFuture.thenApply(response -> {
                 try {
+                    if (!httpInvoker.ifResponseOk(response)) {
+                        throw new ClientInvokeException(MessageFormat.format("调用注册中心接口时发生错误，响应码：{0}",
+                                response.getStatusLine().getStatusCode()));
+                    }
+
                     String rawBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                     return JSONArray.parseArray(rawBody, InstanceMetadata.class);
                 } catch (Exception e) {

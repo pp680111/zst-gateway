@@ -1,6 +1,6 @@
 package com.zst.router;
 
-import com.zst.dispatcher.ServiceDiscoveryDispatcher;
+import com.zst.discovery.dispatcher.ServiceDiscoveryDispatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.server.RouterFunction;

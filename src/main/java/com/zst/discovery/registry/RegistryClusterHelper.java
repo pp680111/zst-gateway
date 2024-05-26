@@ -1,6 +1,6 @@
-package com.zst.discovery.zstregistry;
+package com.zst.discovery.registry;
 
-import com.zst.discovery.zstregistry.model.Server;
+import com.zst.discovery.registry.model.Server;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;

@@ -36,6 +36,10 @@ public class HttpInvoker {
     private static final int TIMEOUT_MS = 4000;
     private CloseableHttpAsyncClient httpAsyncClient = null;
 
+    public boolean ifResponseOk(HttpResponse response) {
+        return response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300;
+    }
+
     public CompletableFuture<HttpResponse> doGet(String url, Map<String, String> header, Map<String, String> params) {
         HttpGet req = null;
         try {
@@ -154,6 +158,8 @@ public class HttpInvoker {
                 RequestConfig requestConfig = RequestConfig.custom()
                         .setConnectTimeout(TIMEOUT_MS)
                         .setSocketTimeout(TIMEOUT_MS)
+                        .setCircularRedirectsAllowed(false)
+                        .setRedirectsEnabled(true)
                         .build();
 
                 CloseableHttpAsyncClient newClient = HttpAsyncClients.custom()

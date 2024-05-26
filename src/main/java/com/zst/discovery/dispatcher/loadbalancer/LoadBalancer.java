@@ -1,4 +1,4 @@
-package com.zst.dispatcher.loadbalancer;
+package com.zst.discovery.dispatcher.loadbalancer;
 
 import java.util.List;
 
