@@ -31,6 +31,6 @@ public class ServiceDiscoveryServerRequest {
             path = path.substring(1);
         }
 
-        return String.format("%s:%d/%s", serviceInstance.getHost(), serviceInstance.getPort(), path);
+        return String.format("http://%s:%d/%s", serviceInstance.getHost(), serviceInstance.getPort(), path);
     }
 }

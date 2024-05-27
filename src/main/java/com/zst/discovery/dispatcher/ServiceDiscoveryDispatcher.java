@@ -1,23 +1,23 @@
 package com.zst.discovery.dispatcher;
 
-import com.alibaba.fastjson2.JSON;
 import com.zst.discovery.dispatcher.loadbalancer.LoadBalancer;
-import com.zst.discovery.registry.RegistryCenterService;
 import com.zst.discovery.exception.NoAvailableServiceInstanceException;
+import com.zst.discovery.registry.RegistryCenterService;
 import com.zst.discovery.registry.model.InstanceMetadata;
-import com.zst.discovery.registry.model.Server;
 import com.zst.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
 
 @Component
 public class ServiceDiscoveryDispatcher {
@@ -27,10 +27,10 @@ public class ServiceDiscoveryDispatcher {
     private LoadBalancer<InstanceMetadata> loadBalancer;
 
     public Mono<ServerResponse> doDispatch(ServerRequest request) {
-        Mono.just(request)
+        return Mono.just(request)
                 .map(this::parseRequest)
                 .flatMap(this::determineServiceInstance)
-
+                .flatMap(this::doProxyInvoke);
     }
 
 
@@ -47,6 +47,10 @@ public class ServiceDiscoveryDispatcher {
 
         String path = request.uri().getPath();
         path = path.substring(serviceId.length() + 1);
+
+        if (StringUtils.isNotEmpty(request.uri().getQuery())) {
+            path += "?" + request.uri().getQuery();
+        }
 
         ServiceDiscoveryServerRequest wrapRequest = new ServiceDiscoveryServerRequest();
         wrapRequest.setServerRequest(request);
@@ -81,25 +85,33 @@ public class ServiceDiscoveryDispatcher {
     private Mono<ServerResponse> doProxyInvoke(ServiceDiscoveryServerRequest request) {
         HttpHeaders sourceHeaders = request.getServerRequest().headers().asHttpHeaders();
 
-        WebClient.create(request.buildTargetUrl())
+        return WebClient.create(request.buildTargetUrl())
                 .method(request.getServerRequest().method())
                 .headers(headers -> headers.addAll(sourceHeaders))
+                .body(BodyInserters.fromDataBuffers(request.getServerRequest().body(BodyExtractors.toDataBuffers())))
                 .exchangeToMono(response -> {
-                    HttpHeaders responseHeaders = response.headers().asHttpHeaders();
-                    MediaType contentType = responseHeaders.getContentType();
-                    ServerResponse serverResponse = ServerResponse.status(response.statusCode())
-                            .headers(headers -> headers.addAll(responseHeaders))
-                            .bodyValue(BodyInserters.fromPublisher(response.bodyToFlux(String.class), String.class));
-                    if (contentType == MediaType.APPLICATION_JSON) {
-                        response.body(BodyExtractors.toMono(String.class))
-                                .map(jsonBody -> {
-                                    return ServerResponse.status(response.statusCode())
-                                            .headers(headers -> headers.addAll(responseHeaders))
-                                            .body(BodyInserters.fromValue(jsonBody));
-                                })
-                    }
+//                    return response.bodyToMono(String.class)
+//                            .map(body -> ServerResponse
+//                                    .status(response.statusCode())
+//                                    .headers(headers -> headers.addAll(response.headers().asHttpHeaders()))
+//                                    .bodyValue(body));
+                    return response.body(BodyExtractors.toDataBuffers()).collect(ArrayList<DataBuffer>::new, ArrayList::add)
+                            .map(buffers -> ServerResponse
+                                    .status(response.statusCode())
+                                    .headers(headers -> headers.addAll(response.headers().asHttpHeaders()))
+                                    .body(BodyInserters.fromDataBuffers(Flux.fromIterable(buffers))));
 
-                });
+                    /*
+                       这种方式处理的话，看起来response的body部分还没有读渠道数据的时候，就已经返回了，
+                       因此body部分读不到数据一直为空，需要像上面这部分的代码一样先从ClientResponse读取body数据之后
+                       下一步的map转换成ServerResponse，才能保证响应体有的转发
+                     */
+//                    return ServerResponse
+//                            .status(response.statusCode())
+//                            .headers(headers -> headers.addAll(response.headers().asHttpHeaders()))
+//                            .body(BodyInserters.fromDataBuffers(response.body(BodyExtractors.toDataBuffers())));
+                })
+                .flatMap(response -> response);
     }
 
 }
