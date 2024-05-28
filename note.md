@@ -10,3 +10,6 @@ TODO
 * 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
 * zstRegistry包中的异常名称需要更正一下
 * 设计一套前后过滤器，提供数据过滤转换功能（比如路径重写之类的）
+* 尝试使用WebHandler来实现路由入口
+
+WebHandler的ServerWebExchange提供了Request对象来读取请求数据，Response来向输出流写入数据
