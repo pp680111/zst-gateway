@@ -10,6 +10,14 @@ TODO
 * 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
 * zstRegistry包中的异常名称需要更正一下
 * 设计一套前后过滤器，提供数据过滤转换功能（比如路径重写之类的）
-* 尝试使用WebHandler来实现路由入口
+* 尝试使用WebHandler来实现路由入口，以及整套调用链路
 
 WebHandler的ServerWebExchange提供了Request对象来读取请求数据，Response来向输出流写入数据
+Spring Gateway使用了WebHandler来作为请求的入口，执行整套Gateway中的filter->router-postFilter的流程。
+提前从配置文件中生成路由信息，在该WebHandler中执行路由逻辑
+
+WebFlux的请求处理入口，可以看DispatcherHandler.handle方法，它本身也是作为一个WebHandler被web容器调用的
+
+添加自定义的WebHandler到DispatcherHandler的处理链路的思路，大致是从Context中获取DispatcherHandler使用的HandlerMapping实现类对象，将自己的WebHandler注入到合适的实现类对象中
+
+翻翻WebFlux的代码，看它塞了什么RequestMapping或WebHandler到处理DispatcherHandler中，作为自己实现的节俭
