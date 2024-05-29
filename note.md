@@ -20,4 +20,7 @@ WebFlux的请求处理入口，可以看DispatcherHandler.handle方法，它本�
 
 添加自定义的WebHandler到DispatcherHandler的处理链路的思路，大致是从Context中获取DispatcherHandler使用的HandlerMapping实现类对象，将自己的WebHandler注入到合适的实现类对象中
 
-翻翻WebFlux的代码，看它塞了什么RequestMapping或WebHandler到处理DispatcherHandler中，作为自己实现的节俭
+翻翻WebFlux的代码，看它塞了什么RequestMapping或WebHandler到处理DispatcherHandler中，作为自己实现的示例
+或者是SimpleUrlHandlerMapping（往SimpleUrlHandlerMapping的urlMap里面插入数据就可以实现代码方式的urlEndpoint注册了）(记得注册了url之后调用一次initApplicationContext)
+WebFliter的话直接声明为Bean就可以被调用了
+研究一下WebServerExchange中的request怎么转换为RouterFunction中的ServerRequest（前者没有拿PathVariable的方法）
