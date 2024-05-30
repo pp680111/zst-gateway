@@ -1,10 +1,13 @@
 package com.zst.gateway.configuration;
 
-import com.zst.gateway.router.GatewayEntranceRouter;
+import com.zst.gateway.core.GatewayEntranceHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
-@Import(GatewayEntranceRouter.class)
 @Configuration
 public class WebConfig {
+    @Bean
+    public GatewayEntranceHandler gatewayEntranceRouter() {
+        return new GatewayEntranceHandler();
+    }
 }

@@ -19,8 +19,21 @@ Spring Gateway使用了WebHandler来作为请求的入口，执行整套Gateway�
 WebFlux的请求处理入口，可以看DispatcherHandler.handle方法，它本身也是作为一个WebHandler被web容器调用的
 
 添加自定义的WebHandler到DispatcherHandler的处理链路的思路，大致是从Context中获取DispatcherHandler使用的HandlerMapping实现类对象，将自己的WebHandler注入到合适的实现类对象中
+(这个方案目前不可行，因为在WebFlux中默认只会使用一个WebHandler，即DispatcherHandler。要覆盖掉它也可以，但是这种实现方式yysy也不够优雅)
 
-翻翻WebFlux的代码，看它塞了什么RequestMapping或WebHandler到处理DispatcherHandler中，作为自己实现的示例
+翻翻WebFlux的代码，看它塞了什么RequestMapping或WebHandler到处理DispatcherHandler中，作为自己实现的示例（它加了一个自己的HandlerMapping实现类）
+
 或者是SimpleUrlHandlerMapping（往SimpleUrlHandlerMapping的urlMap里面插入数据就可以实现代码方式的urlEndpoint注册了）(记得注册了url之后调用一次initApplicationContext)
 WebFliter的话直接声明为Bean就可以被调用了
+
+
 研究一下WebServerExchange中的request怎么转换为RouterFunction中的ServerRequest（前者没有拿PathVariable的方法）
+ServerReqeust有默认实现类DefaultServerRequest，构造方法参数为ServerWebExchange和List<HttpMessageReader<?>> messageReaders), 
+messageReaders来自ServerCodecConfigurer这个Bean的.getReaders方法
+
+ServerRequest的pathVariable，读取的是exchange的attributes这个map中key=org.springframework.web.reactive.function.server.RouterFunctions.uriTemplateVariables对应的Map类型的value，从这里拿pathVariable
+（目前看来，就算不经过ServerRequest的转换，ServerWebExchange里面还是会解析pathVariable的）
+
+为什么SimpleUrlHandlerMapping用Autowire注入的时候，会提示NoBean，但是在ReadyEvent中，又可以从Context里面拿到，难不成它是手动注册的？
+（好像确实没有手动注册SimpleUrlHandlerMapping类型的Bean，在WebFlux自带的配置类中，注册的Bean是HandlerMapping类而不是SimpleUrlHandlerMapping,
+估计要用这个接口来注入Bean，然后找到instanceof SimpleUrlHandlerMapping的Bean才可以拿到了）

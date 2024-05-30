@@ -1,4 +1,4 @@
-package com.zst.gateway.router;
+package com.zst.gateway.core;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
