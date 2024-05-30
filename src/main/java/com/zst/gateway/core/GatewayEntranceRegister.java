@@ -1,6 +1,7 @@
 package com.zst.gateway.core;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -12,13 +13,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
-public class GatewayEntranceHandler implements WebHandler, ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
+public class GatewayEntranceRegister implements WebHandler, ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
     private ApplicationContext applicationContext;
 
-    @Override
-    public Mono<Void> handle(ServerWebExchange exchange) {
-        return Mono.just(null);
-    }
+    @Autowired
+    private GatewayResponseHandler gatewayResponseHandler;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -34,15 +33,8 @@ public class GatewayEntranceHandler implements WebHandler, ApplicationContextAwa
         mapping.initApplicationContext();
     }
 
-//    @Autowired
-//    private ServiceDiscoveryDispatcher serviceDiscoveryDispatcher;
-//
-//    @Bean
-//    public RouterFunction<ServerResponse> serviceDiscoveryRoute() {
-//        return RouterFunctions.route()
-//                .path("/{serviceId}/**", builder -> builder
-//                        .GET(serviceDiscoveryDispatcher::doDispatch)
-//                        .POST(serviceDiscoveryDispatcher::doDispatch)
-//                ).build();
-//    }
+    @Override
+    public Mono<Void> handle(ServerWebExchange exchange) {
+        return gatewayResponseHandler.handle(exchange);
+    }
 }
