@@ -1,26 +1,29 @@
 package com.zst.gateway.discovery.dispatcher;
 
+import com.zst.gateway.core.GatewayServerWebExchange;
 import com.zst.gateway.discovery.exception.NoAvailableServiceInstanceException;
 import com.zst.gateway.discovery.registry.model.InstanceMetadata;
 import com.zst.gateway.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * 在基于服务发现的请求转发流程中使用的ServerRequest包装类
- * @deprecated
+ * 基于服务发现的网关请求
  */
 @Getter
 @Setter
-@Deprecated
-public class ServiceDiscoveryServerRequest {
-    private ServerRequest serverRequest;
+public class ServiceDiscoveryServerWebExchange extends GatewayServerWebExchange  {
     private String serviceId;
     private String path;
     private InstanceMetadata serviceInstance;
 
-    public String buildTargetUrl() {
+    public ServiceDiscoveryServerWebExchange(ServerWebExchange serverWebExchange) {
+        super(serverWebExchange);
+    }
+
+    @Override
+    public String getRequestUrl() {
         if (serviceInstance == null) {
             throw new NoAvailableServiceInstanceException("No available service instance");
         }

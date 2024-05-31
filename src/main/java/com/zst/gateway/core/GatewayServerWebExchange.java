@@ -1,10 +1,10 @@
 package com.zst.gateway.core;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 
@@ -13,9 +13,13 @@ import reactor.core.publisher.Flux;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 public class GatewayServerWebExchange {
     private ServerWebExchange serverWebExchange;
+    private GatewayProxyResponse gatewayProxyResponse;
+
+    public GatewayServerWebExchange(ServerWebExchange serverWebExchange) {
+        this.serverWebExchange = serverWebExchange;
+    }
 
     /**
      * 构建完整的请求URL
@@ -23,6 +27,10 @@ public class GatewayServerWebExchange {
      */
     public String getRequestUrl() {
         throw new RuntimeException("未找到目标服务实例");
+    }
+
+    public HttpMethod getRequestMethod() {
+        return serverWebExchange.getRequest().getMethod();
     }
 
     /**

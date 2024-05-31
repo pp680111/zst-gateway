@@ -1,6 +1,7 @@
 package com.zst.gateway.core;
 
-import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -16,10 +17,12 @@ public class GatewayResponseHandler {
             return Mono.error(new IllegalArgumentException("exchange参数不得为空"));
         }
 
-        Mono.just(new GatewayServerWebExchange(exchange))
+        // 注意这里的then，之前没研究过这个operator的效果，可能会出问题
+        return Mono.just(new GatewayServerWebExchange(exchange))
                 .map(this::doPreHandle)
-                .doOnNext(this::executeRequest)
-                .map(this::doPostHandle);
+                .flatMap(this::executeRequest)
+                .map(this::doPostHandle)
+                .then();
     }
 
     private GatewayServerWebExchange doPreHandle(GatewayServerWebExchange exchange) {
@@ -37,7 +40,15 @@ public class GatewayResponseHandler {
         return result.get();
     }
 
-    private void executeRequest(GatewayServerWebExchange exchange) {
+    private Mono<GatewayServerWebExchange> executeRequest(GatewayServerWebExchange exchange) {
+        return WebClient.create(exchange.getRequestUrl())
+                .method(exchange.getRequestMethod())
+                .headers(httpHeaders -> httpHeaders.addAll(exchange.getRequestHeader()))
+                .body(BodyInserters.fromDataBuffers(exchange.getRequestBody()))
+                .exchangeToMono(clientResponse -> {
+                    exchange.setGatewayProxyResponse(new GatewayProxyResponse(clientResponse));
+                    return Mono.just(exchange);
+                });
 
     }
 
