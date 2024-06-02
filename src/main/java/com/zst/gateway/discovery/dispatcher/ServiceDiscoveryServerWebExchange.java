@@ -18,8 +18,12 @@ public class ServiceDiscoveryServerWebExchange extends GatewayServerWebExchange 
     private String path;
     private InstanceMetadata serviceInstance;
 
-    public ServiceDiscoveryServerWebExchange(ServerWebExchange serverWebExchange) {
+    private ServiceDiscoveryServerWebExchange(ServerWebExchange serverWebExchange) {
         super(serverWebExchange);
+    }
+
+    public static ServiceDiscoveryServerWebExchange create(GatewayServerWebExchange exchange) {
+        return new ServiceDiscoveryServerWebExchange(exchange.getServerWebExchange());
     }
 
     @Override

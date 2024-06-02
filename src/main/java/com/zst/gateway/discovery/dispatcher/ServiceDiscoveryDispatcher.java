@@ -23,7 +23,6 @@ import java.util.ArrayList;
  * @deprecated
  */
 @Deprecated
-@Component
 public class ServiceDiscoveryDispatcher {
     @Autowired
     private RegistryCenterService registryCenterService;

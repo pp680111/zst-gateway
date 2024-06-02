@@ -25,9 +25,4 @@ public class ZstRegistryConfig {
                                                        RegistryCenterClient registryCenterClient) {
         return new RegistryCenterService(registryClusterHelper, registryCenterClient);
     }
-
-    @Bean
-    public LoadBalancer<?> randomLoadBalancer() {
-        return new RandomLoadBalancer();
-    }
 }

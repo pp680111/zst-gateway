@@ -1,8 +1,10 @@
 package com.zst.gateway.core;
 
+import reactor.core.publisher.Mono;
+
 /**
  *
  */
 public interface PostHandler {
-    GatewayServerWebExchange handle(GatewayServerWebExchange exchange);
+    Mono<GatewayServerWebExchange> handle(Mono<GatewayServerWebExchange> exchange);
 }

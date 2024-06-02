@@ -4,13 +4,16 @@
 * loadBalancer、服务节点过滤等操作需要链路化优化(ok)
 * 集成注册中心(ok)
 * 优化一下错误响应处理逻辑(暂时没什么想法，先跳过)
+* 尝试使用WebHandler来实现路由入口，以及整套调用链路
+* 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
 
 TODO
 * 集成配置中心
-* 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
 * zstRegistry包中的异常名称需要更正一下
 * 设计一套前后过滤器，提供数据过滤转换功能（比如路径重写之类的）
-* 尝试使用WebHandler来实现路由入口，以及整套调用链路
+* 想一个方式来处理同一个项目内的模块化代码（比如这个网关项目里面的各类PreHandler的实现实现类）
+* 测试以下现在处理响应体的方式会不会有问题
+* 写一个HandlerMapping来拦截请求（因为/**在SimpleHandlerMapping中被使用了，所以没办法用这个来匹配路径）
 
 WebHandler的ServerWebExchange提供了Request对象来读取请求数据，Response来向输出流写入数据
 Spring Gateway使用了WebHandler来作为请求的入口，执行整套Gateway中的filter->router-postFilter的流程。
@@ -37,3 +40,5 @@ ServerRequest的pathVariable，读取的是exchange的attributes这个map中key=
 为什么SimpleUrlHandlerMapping用Autowire注入的时候，会提示NoBean，但是在ReadyEvent中，又可以从Context里面拿到，难不成它是手动注册的？
 （好像确实没有手动注册SimpleUrlHandlerMapping类型的Bean，在WebFlux自带的配置类中，注册的Bean是HandlerMapping类而不是SimpleUrlHandlerMapping,
 估计要用这个接口来注入Bean，然后找到instanceof SimpleUrlHandlerMapping的Bean才可以拿到了）
+
+ServerResponse写数据到WebServerExchange的代码，可以从ServerResponseResultHandler开始看起
