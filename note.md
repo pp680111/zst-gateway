@@ -14,6 +14,9 @@ TODO
 * 想一个方式来处理同一个项目内的模块化代码（比如这个网关项目里面的各类PreHandler的实现实现类）
 * 测试以下现在处理响应体的方式会不会有问题
 * 写一个HandlerMapping来拦截请求（因为/**在SimpleHandlerMapping中被使用了，所以没办法用这个来匹配路径）
+* 在代理请求结束时就解析Header等响应数据，在GatewayExchange对象中存储这些数据，以便PostHandler修改这部分要返回的数据
+* 对于Option这类特殊的Method，DispatcherHandler里面对prefetch请求的处理
+* 学习一下shenyu的plugin chain中对代码链的处理方式（比如说怎么从chain中间的某些元素上跳过或者返回的处理
 
 WebHandler的ServerWebExchange提供了Request对象来读取请求数据，Response来向输出流写入数据
 Spring Gateway使用了WebHandler来作为请求的入口，执行整套Gateway中的filter->router-postFilter的流程。
