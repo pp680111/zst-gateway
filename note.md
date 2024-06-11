@@ -6,17 +6,18 @@
 * 优化一下错误响应处理逻辑(暂时没什么想法，先跳过)
 * 尝试使用WebHandler来实现路由入口，以及整套调用链路
 * 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
+* 学习一下shenyu的plugin chain中对代码链的处理方式（比如说怎么从chain中间的某些元素上跳过或者返回的处理(ok)
 
 TODO
 * 集成配置中心
 * zstRegistry包中的异常名称需要更正一下
 * 设计一套前后过滤器，提供数据过滤转换功能（比如路径重写之类的）
 * 想一个方式来处理同一个项目内的模块化代码（比如这个网关项目里面的各类PreHandler的实现实现类）
-* 测试以下现在处理响应体的方式会不会有问题
+* com.zst.gateway.core.GatewayWebHandler.executeRequest，想想看有什么办法可以把读取响应体的过程改为流式的（现在是直接读取整个响应体到内存的，会不会出现占用太多内存的问题）(其实对于正常响应处理流程来说确实就是要完整的将响应体读取到内存中的，这里可以看看spring cloud gateway中怎么处理文件传输类型的请求)
 * 写一个HandlerMapping来拦截请求（因为/**在SimpleHandlerMapping中被使用了，所以没办法用这个来匹配路径）
 * 在代理请求结束时就解析Header等响应数据，在GatewayExchange对象中存储这些数据，以便PostHandler修改这部分要返回的数据
 * 对于Option这类特殊的Method，DispatcherHandler里面对prefetch请求的处理
-* 学习一下shenyu的plugin chain中对代码链的处理方式（比如说怎么从chain中间的某些元素上跳过或者返回的处理
+* 
 
 WebHandler的ServerWebExchange提供了Request对象来读取请求数据，Response来向输出流写入数据
 Spring Gateway使用了WebHandler来作为请求的入口，执行整套Gateway中的filter->router-postFilter的流程。
@@ -45,3 +46,17 @@ ServerRequest的pathVariable，读取的是exchange的attributes这个map中key=
 估计要用这个接口来注入Bean，然后找到instanceof SimpleUrlHandlerMapping的Bean才可以拿到了）
 
 ServerResponse写数据到WebServerExchange的代码，可以从ServerResponseResultHandler开始看起
+
+## HandlerMapping实现
+
+### 注册
+DispatcherHandler使用的是从Spring上下文中扫描实现了HandlerMapping的类的Bean，因此在注册这方面没有什么太大的问题，注意下排序即可
+
+### 实现
+DispatcherHandler使用HandlerMapping.getHandler方法来根据ServerWebExchange获取对应的Handler对象，因此在自定义HandlerMapping实现类的时候，重点在与怎么实现HandlerMapping.getHandler方法
+通过观察SimpleUrlHandlerMapping和其他HandlerMapping实现类可以得知，有一个抽象类AbstractHandlerMapping提供了HandlerMapping实现类的一些公用逻辑，实现了
+getHandler方法，因此可以通过继承此类来减少代码量，实现其抽象方法getHandlerInternal
+
+DispatcherHandler对于HandlerMapping.getHandler返回的对象类型并没有要求，它通过HandlerAdapter来实现与实际Handler之间的解耦，适应各类自定义的HandlerMapping返回的Handler对象。
+在DispatcherHandler.invokeHandler方法中，DispatcherHandler通过遍历自己从Spring上下文中获取的HandlerAdapter，调用HandlerAdapter.supports方法来判断
+该adapter是否识别对应的handler对象，识别成功的话就用DispatcherHandler.handle方法来委托调用handler。
