@@ -7,6 +7,7 @@
 * 尝试使用WebHandler来实现路由入口，以及整套调用链路
 * 思考一下有什么更加优雅的方式注册RouterFunction（编程式的），现在这种用Bean来声明RouterFunction的，总感觉使用起来不是很便利（把GatewayEntranceRouter挪到discovery包的代码中进行手动声明）
 * 学习一下shenyu的plugin chain中对代码链的处理方式（比如说怎么从chain中间的某些元素上跳过或者返回的处理(ok)
+* 写一个HandlerMapping来拦截请求（因为/**在SimpleHandlerMapping中被使用了，所以没办法用这个来匹配路径）
 
 TODO
 * 集成配置中心
@@ -14,7 +15,6 @@ TODO
 * 设计一套前后过滤器，提供数据过滤转换功能（比如路径重写之类的）
 * 想一个方式来处理同一个项目内的模块化代码（比如这个网关项目里面的各类PreHandler的实现实现类）
 * com.zst.gateway.core.GatewayWebHandler.executeRequest，想想看有什么办法可以把读取响应体的过程改为流式的（现在是直接读取整个响应体到内存的，会不会出现占用太多内存的问题）(其实对于正常响应处理流程来说确实就是要完整的将响应体读取到内存中的，这里可以看看spring cloud gateway中怎么处理文件传输类型的请求)
-* 写一个HandlerMapping来拦截请求（因为/**在SimpleHandlerMapping中被使用了，所以没办法用这个来匹配路径）
 * 在代理请求结束时就解析Header等响应数据，在GatewayExchange对象中存储这些数据，以便PostHandler修改这部分要返回的数据
 * 对于Option这类特殊的Method，DispatcherHandler里面对prefetch请求的处理
 * 

@@ -1,18 +1,14 @@
 package com.zst.gateway.configuration;
 
 import com.zst.gateway.core.GatewayEntranceRegister;
+import com.zst.gateway.core.GatewayHandlerMapping;
 import com.zst.gateway.core.GatewayWebHandler;
-import com.zst.gateway.discovery.dispatcher.ServiceDiscoveryDispatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class WebConfig {
-    @Bean
+//    @Bean
     public GatewayEntranceRegister gatewayEntranceRouter() {
         return new GatewayEntranceRegister();
     }
@@ -20,6 +16,11 @@ public class WebConfig {
     @Bean
     public GatewayWebHandler gatewayWebHandler() {
         return new GatewayWebHandler();
+    }
+
+    @Bean
+    public GatewayHandlerMapping gatewayHandlerMapping(GatewayWebHandler gatewayWebHandler) {
+        return new GatewayHandlerMapping(gatewayWebHandler);
     }
 
 //    @Deprecated
