@@ -3,8 +3,6 @@ package com.zst.gateway.discovery.registry.configuration;
 import com.zst.gateway.discovery.registry.RegistryCenterClient;
 import com.zst.gateway.discovery.registry.RegistryCenterService;
 import com.zst.gateway.discovery.registry.RegistryClusterHelper;
-import com.zst.gateway.discovery.dispatcher.loadbalancer.LoadBalancer;
-import com.zst.gateway.discovery.dispatcher.loadbalancer.RandomLoadBalancer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
